@@ -1,0 +1,139 @@
+# ══════════════════════════════════════════════════════════════════
+#  SAURON false-positive knowledge base
+#  Consulted by backend/agents/validator.py before ANY high/critical
+#  finding is accepted into the engagement report.
+# ══════════════════════════════════════════════════════════════════
+#
+# Structure:
+#   <category>:
+#     - id: stable id
+#       pattern: regex against evidence (stdout/stderr/body)
+#       reason: why this is almost certainly a FP
+#       severity_cap: if matched, finding cannot exceed this severity
+#       downgrade_to: optional — severity level to downgrade to
+# ══════════════════════════════════════════════════════════════════
+
+web:
+
+  - id: waf_uniform_response
+    pattern: "(cloudflare|akamai|imperva|sucuri|incapsula|barracuda|f5-bigip)"
+    reason: "Target responded with a WAF signature — repeated identical
+             responses to injection payloads are almost certainly WAF
+             blocks, not successful exploits."
+    severity_cap: low
+
+  - id: sqli_generic_error
+    pattern: "(internal server error|database error occurred|please try again)"
+    reason: "Generic 500 page is not SQLi confirmation. A real SQLi
+             leaks DB-specific error text (ORA-xxxx, MySQL syntax
+             error, ERROR 42000, etc.) OR shows data extraction."
+    severity_cap: low
+    downgrade_to: info
+
+  - id: xss_reflected_not_executed
+    pattern: "&lt;script&gt;|&#60;script"
+    reason: "Payload was HTML-encoded by the server — reflected but
+             not executed. This is NOT an XSS."
+    severity_cap: info
+
+  - id: path_traversal_404
+    pattern: "HTTP/[0-9.]+ 404"
+    reason: "Path traversal attempt returned 404 — target did not
+             serve the traversed file. Not a confirmed vulnerability."
+    severity_cap: info
+
+  - id: idor_auth_required
+    pattern: "(401 Unauthorized|login required|redirect.*login)"
+    reason: "Server rejected unauthenticated access — not an IDOR."
+    severity_cap: info
+
+  - id: csrf_with_samesite
+    pattern: "SameSite=(Strict|Lax)"
+    reason: "Cookie is SameSite-protected — most CSRF attack vectors
+             are mitigated by the browser."
+    severity_cap: low
+
+network:
+
+  - id: nmap_filtered_tcp
+    pattern: "Host is up.*0 \\(ports closed\\)|filtered"
+    reason: "A fully filtered host gives no info about services.
+             Do not infer exploitable services from filtered ports."
+    severity_cap: info
+
+  - id: ssl_cert_self_signed_on_internal
+    pattern: "self[- ]signed certificate"
+    reason: "Self-signed certs are expected on internal/test hosts.
+             Only report in production external scope."
+    severity_cap: low
+
+  - id: telnet_honeypot_banner
+    pattern: "Cowrie|Kippo|telnetd.*2\\.[0-9]+\\.[0-9]+"
+    reason: "Banner matches known honeypot signatures."
+    severity_cap: info
+
+active_directory:
+
+  - id: kerberoast_disabled_account
+    pattern: "(ACCOUNT_DISABLED|STATUS_ACCOUNT_DISABLED)"
+    reason: "SPN belongs to a disabled account — not exploitable."
+    severity_cap: info
+
+  - id: asrep_preauth_required
+    pattern: "(KDC_ERR_PREAUTH_REQUIRED|Pre-authentication required)"
+    reason: "Pre-auth IS required — not AS-REP roastable."
+    severity_cap: info
+
+  - id: smb_signing_optional_not_disabled
+    pattern: "signing:True"
+    reason: "SMB signing is on. Not vulnerable to SMB relay."
+    severity_cap: info
+
+api:
+
+  - id: api_401_is_correct
+    pattern: "401 Unauthorized"
+    reason: "Endpoint correctly rejected unauthenticated request."
+    severity_cap: info
+
+  - id: api_cors_null_origin_no_creds
+    pattern: "Access-Control-Allow-Origin: \\*"
+    reason: "Wildcard CORS without credentials is usually not
+             exploitable for stealing authenticated data."
+    severity_cap: low
+
+llm_ai:
+
+  - id: prompt_injection_refused
+    pattern: "(I cannot|I can't|I'm not able|against my guidelines|as an AI)"
+    reason: "Model refused the jailbreak payload — guardrails held."
+    severity_cap: info
+
+  - id: generic_llm_echo
+    pattern: "^As an AI language model"
+    reason: "Model echoed a disclaimer — not data leakage."
+    severity_cap: info
+
+mobile:
+
+  - id: android_debuggable_release_only
+    pattern: "android:debuggable=\"false\""
+    reason: "App is NOT debuggable in release build — false alert."
+    severity_cap: info
+
+# ── Rabbit-hole detectors ─────────────────────────────────────────
+# Not technically FPs — these signal wasted effort.
+
+rabbit_holes:
+
+  - id: waf_infinite_loop
+    trigger: "same WAF block response received 5+ times on same endpoint"
+    advice: "Stop fuzzing this endpoint. Rotate to a different entry point."
+
+  - id: rate_limit_backoff_needed
+    trigger: "429 responses 3+ times within 60s"
+    advice: "Apply exponential backoff or switch stealth profile to silent."
+
+  - id: placeholder_vs_real_target
+    trigger: "target contains 'example.com' or 'localhost' without explicit operator opt-in"
+    advice: "Almost certainly a misconfigured scope. Halt and escalate."

@@ -42,8 +42,12 @@ Every command the agent issues is executed inside a hardened sandbox against **t
   - OpenAI GPT (4o, 4.1, o-series)
   - Google Gemini (1.5 / 2.x)
   - **Ollama + WhiteRabbitNeo** for fully offline, air-gapped ops
-- **Autonomous agent loop** — ReAct-style planning with reflection, self-critique, and replanning
-- **Specialised sub-agents** — Recon, Scanner, Exploiter, Post-Ex, Red-Team, Reporter
+- **Senior-pentester mindset** — 14 non-negotiable principles baked into every sub-agent (scope discipline, hypothesis-first action, evidence hierarchy, no-fabrication) — see [`docs/AGENT_INTELLIGENCE.md`](docs/AGENT_INTELLIGENCE.md)
+- **False-positive firewall** — every finding runs through a YAML-driven FP knowledge base, a dual-source confirmation gate, and an evidence-quality scorer before it can enter the report
+- **Critic sub-agent** — a dedicated second-pass reviewer whose only job is to destroy weak findings and catch rabbit holes
+- **Hypothesis journal + phase budgets** — every action must serve a stated hypothesis with a disproof condition; the orchestrator times out phases that stop producing new information
+- **Autonomous agent loop** — ReAct-style planning with reflection, self-critique, rabbit-hole detection, and replanning
+- **Specialised sub-agents** — Recon, Scanner, Exploiter, Post-Ex, Red-Team, Reporter, Critic
 - **MCP-native** — every capability exposed as a Model Context Protocol tool
 - **Tool arbitration** — the LLM router picks the right model for the right job (cheap model for triage, heavy model for exploitation reasoning)
 
@@ -76,9 +80,11 @@ SAURON ships with **stealth configuration primitives** (jitter, sleep, user-agen
 
 ## Quick Start
 
+> **For a detailed, platform-specific walkthrough (Kali / Ubuntu / Debian / Docker / macOS / WSL2), see [`docs/INSTALL.md`](docs/INSTALL.md).** The quick start below is the happy path; the install guide covers prerequisites, tool setup, troubleshooting, and common pitfalls.
+
 ### 1. Clone & install
 ```bash
-git clone https://github.com/sauron666/ai-test.git sauron
+git clone https://github.com/sauron666/AI-test.git sauron
 cd sauron
 ./scripts/install.sh
 ```
@@ -106,11 +112,19 @@ cp .env.example .env
 This single command boots:
 - SAURON backend API (`:8000`)
 - MCP server (`:8765`)
-- Web dashboard (`:8080`)
+- Web dashboard served by the backend (`:8000/`)
 - Ollama daemon if configured
 - Background worker for long-running scans
 
-Open **http://localhost:8080** and the Eye of Sauron is watching.
+Open **http://localhost:8000** and the Eye of Sauron is watching.
+
+### Docker one-liner
+```bash
+cp .env.example .env   # add your LLM keys
+docker compose up -d --build
+```
+
+See [`docs/INSTALL.md`](docs/INSTALL.md) §6 for the full Docker walkthrough.
 
 ---
 
@@ -145,7 +159,21 @@ Open **http://localhost:8080** and the Eye of Sauron is watching.
               └────────────────────┘
 ```
 
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full breakdown.
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full breakdown and [`docs/AGENT_INTELLIGENCE.md`](docs/AGENT_INTELLIGENCE.md) for how the agent thinks.
+
+---
+
+## Why SAURON doesn't hallucinate findings
+
+Most "AI pentester" demos look impressive and then file 40 false positives the moment they meet a WAF. SAURON was built to avoid exactly that. Three mechanisms work together:
+
+1. **Senior mindset prompt** — the agent is told, before every action, to behave like a 10-year consultant: scope-strict, hypothesis-first, evidence-bound, no-fabrication. See [`config/prompts/senior_mindset.md`](config/prompts/senior_mindset.md).
+2. **False-positive firewall** — [`backend/agents/validator.py`](backend/agents/validator.py) runs every candidate finding through a YAML knowledge base of known-noise patterns ([`config/knowledge/false_positives.yaml`](config/knowledge/false_positives.yaml)), a dual-source confirmation gate (no single-tool HIGHs), and an evidence-quality scorer.
+3. **Critic loop** — [`backend/agents/critic_agent.py`](backend/agents/critic_agent.py) is a dedicated reviewer. It never runs tools — it only tries to destroy weak findings with `VERDICT: REJECT / DEMOTE / ESCALATE`. Phase-level reviews catch rabbit holes after the fact.
+
+On top of that, **phase budgets** cut any loop that stops producing new information, a **hypothesis journal** tracks what the agent believes and what would disprove it, and **rabbit-hole detectors** fire on WAF loops, rate-limiting, and placeholder-target misconfigurations.
+
+The full design is documented in [`docs/AGENT_INTELLIGENCE.md`](docs/AGENT_INTELLIGENCE.md).
 
 ---
 
