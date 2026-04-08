@@ -1,59 +1,74 @@
+# ═══════════════════════════════════════════════════════════════════
+#  SAURON — runtime requirements
+#
+#  Philosophy:
+#    - Use LOWER bounds (>=) so pip picks the newest wheel for the
+#      active Python (3.11 → 3.13+). Hard == pins caused source
+#      builds that broke on Python 3.13.
+#    - Upper bounds only where a known breaking change exists.
+#    - Optional extras (weasyprint, asciinema) are in
+#      requirements-optional.txt so the core install never fails
+#      because of a missing system library like Cairo.
+# ═══════════════════════════════════════════════════════════════════
+
 # ── Core backend ─────────────────────────────────────
-fastapi==0.110.0
-uvicorn[standard]==0.27.1
-pydantic==2.6.1
-pydantic-settings==2.2.1
-python-dotenv==1.0.1
-pyyaml==6.0.1
-httpx==0.27.0
-aiofiles==23.2.1
-websockets==12.0
-jinja2==3.1.3
-python-multipart==0.0.9
+fastapi>=0.110,<0.116
+uvicorn[standard]>=0.27
+pydantic>=2.8,<3
+pydantic-settings>=2.4,<3
+python-dotenv>=1.0
+pyyaml>=6.0.2
+httpx>=0.27
+aiofiles>=23.2
+websockets>=13.0
+jinja2>=3.1
+python-multipart>=0.0.9
 
 # ── Auth ─────────────────────────────────────────────
-passlib[bcrypt]==1.7.4
-python-jose[cryptography]==3.3.0
+passlib[bcrypt]>=1.7.4
+# python-jose is unmaintained; pyjwt is the modern replacement.
+# We keep jose optional-ish via a soft import fallback in code.
+pyjwt[crypto]>=2.8
 
 # ── Database ─────────────────────────────────────────
-sqlalchemy==2.0.27
-aiosqlite==0.19.0
-alembic==1.13.1
+sqlalchemy>=2.0.32
+aiosqlite>=0.20
+alembic>=1.13
 
 # ── LLM providers ────────────────────────────────────
-anthropic>=0.40.0
-openai>=1.30.0
-google-generativeai>=0.7.0
-ollama>=0.2.0
+anthropic>=0.40
+openai>=1.40
+google-generativeai>=0.7
+ollama>=0.3
 
 # ── Model Context Protocol ───────────────────────────
-mcp>=1.0.0
+mcp>=1.0
 
 # ── Tool execution & sandboxing ──────────────────────
-ptyprocess==0.7.0
-psutil==5.9.8
+ptyprocess>=0.7
+psutil>=6.0
 
-# ── Screenshots & recording ──────────────────────────
-pillow==10.2.0
-pyvirtualdisplay==3.0
-asciinema==2.4.0
+# ── Screenshots & recording (core) ───────────────────
+# Pillow >=10.4 is the first release with Python 3.13 wheels.
+# We keep a modest floor so 3.11/3.12 still resolve cleanly.
+pillow>=10.4
+pyvirtualdisplay>=3.0
 
-# ── Reporting ────────────────────────────────────────
-markdown==3.5.2
-weasyprint==61.2
-rich==13.7.0
+# ── Reporting (core) ─────────────────────────────────
+markdown>=3.5
+rich>=13.7
 
 # ── Networking / pentest helpers ─────────────────────
-python-nmap==0.7.1
-dnspython==2.6.1
-requests==2.31.0
-beautifulsoup4==4.12.3
+python-nmap>=0.7
+dnspython>=2.6
+requests>=2.32
+beautifulsoup4>=4.12
 
 # ── Observability ────────────────────────────────────
-structlog==24.1.0
-loguru==0.7.2
+structlog>=24.1
+loguru>=0.7
 
 # ── Dev ──────────────────────────────────────────────
-pytest==8.0.2
-pytest-asyncio==0.23.5
-ruff==0.3.0
+pytest>=8.0
+pytest-asyncio>=0.23
+ruff>=0.5

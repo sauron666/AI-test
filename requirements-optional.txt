@@ -1,0 +1,20 @@
+# ═══════════════════════════════════════════════════════════════════
+#  SAURON — OPTIONAL runtime requirements
+#
+#  These packages add nice-to-have features but depend on system
+#  libraries that are not always available on minimal hosts. The
+#  installer tries them in a best-effort pass and logs (but does
+#  NOT fail) if a wheel cannot be installed.
+#
+#  If any of these are missing SAURON still runs — the affected
+#  feature just degrades gracefully:
+#
+#    weasyprint missing  →  PDF export disabled (Markdown + HTML only)
+#    asciinema  missing  →  PTY session recording disabled
+# ═══════════════════════════════════════════════════════════════════
+
+# PDF rendering — needs libcairo2, libpango, libgdk-pixbuf on Debian/Kali
+weasyprint>=62
+
+# Terminal session recording
+asciinema>=2.4

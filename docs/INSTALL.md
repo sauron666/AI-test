@@ -139,29 +139,62 @@ sudo apt -y install \
 ```bash
 git clone https://github.com/sauron666/AI-test.git sauron
 cd sauron
-python3 -m venv .venv
-source .venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
+./scripts/install.sh
 ```
 
-### 4.4 Bootstrap the runtime
+The installer is **fully automated and idempotent**. It will:
+
+1. Detect your distro and Python version (3.11 / 3.12 / 3.13 all work).
+2. Install the system packages it needs (build tools, Xvfb, scrot,
+   optionally Cairo/Pango for PDF).
+3. Create a `.venv` and upgrade pip / setuptools / wheel.
+4. Install Python dependencies with `--prefer-binary`. If the bulk
+   install fails, it retries each package individually so one
+   broken wheel doesn't kill the whole run.
+5. Try the optional extras (weasyprint, asciinema) best-effort —
+   they degrade gracefully if the system libraries are missing.
+6. Verify every import before declaring success.
+7. Copy `.env.example → .env`.
+
+Installer flags:
+
+| Flag                  | What it does                                         |
+|-----------------------|------------------------------------------------------|
+| `--no-system`         | Skip all apt/dnf steps (host already set up)         |
+| `--no-optional`       | Skip weasyprint + asciinema (minimal mode)           |
+| `--with-kali-tools`   | Also install nmap, nuclei, sqlmap, metasploit, …     |
+| `--with-ollama`       | Also install ollama + pull WhiteRabbitNeo            |
+| `--venv <path>`       | Use a custom venv path (default `.venv`)             |
+| `--python <bin>`      | Force a specific interpreter                         |
+| `--recreate-venv`     | Wipe and recreate the venv                           |
+| `-h` / `--help`       | Show help                                            |
+
+Examples:
 
 ```bash
-cp .env.example .env
-mkdir -p runtime/workdir runtime/screenshots runtime/recordings runtime/reports
-python3 -m backend.database.init
+# Fully loaded Kali install
+./scripts/install.sh --with-kali-tools --with-ollama
+
+# Minimal (already have tools, just want the backend)
+./scripts/install.sh --no-system --no-optional
+
+# Rescue a broken venv after upgrading Python
+./scripts/install.sh --recreate-venv
 ```
 
-Edit `.env` and set at least one LLM provider (see §9).
+### 4.4 Configure LLM keys
+
+Edit `.env` and set at least one LLM provider (see §9). The
+installer already created it from `.env.example`.
 
 ### 4.5 Start SAURON
 
 ```bash
 ./scripts/start.sh
-# or
-uvicorn backend.main:app --host 0.0.0.0 --port 8000
 ```
+
+`start.sh` validates the venv first and prints a clear error if the
+install is incomplete (instead of crashing on `import uvicorn`).
 
 Open <http://localhost:8000>.
 
@@ -471,12 +504,20 @@ Firewall:
 
 ### 13.1 `ModuleNotFoundError` when starting
 
-You forgot to activate the venv, or `requirements.txt` failed.
+The venv is missing or broken. The safe path is to recreate it —
+`requirements.txt` uses version floors so pip will pick the right
+wheels for your Python automatically:
 
 ```bash
-source .venv/bin/activate
-pip install -r requirements.txt
+./scripts/install.sh --recreate-venv
 ```
+
+If you get a source-build error for `pillow`, `pyyaml`, or
+`psutil`, you are on a Python version that is newer than the
+pinned wheels. The current `requirements.txt` already uses `>=`
+floors for these, so `--recreate-venv` fixes it. If you are on an
+exotic Python like 3.14 alpha, install a 3.13 interpreter and use
+`--python python3.13`.
 
 ### 13.2 `weasyprint` errors about Cairo / Pango
 
