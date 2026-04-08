@@ -13,7 +13,6 @@ from pathlib import Path
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from .api.routes import auth as auth_routes
@@ -65,7 +64,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # REST routes
+    # REST routes (always registered FIRST so API paths take priority)
     app.include_router(health_routes.router)
     app.include_router(auth_routes.router)
     app.include_router(engagement_routes.router)
@@ -75,14 +74,18 @@ def create_app() -> FastAPI:
     # WebSocket
     app.include_router(ws_router)
 
-    # Static frontend (served on the same port for single-process mode)
+    # Static frontend (served on the same port for single-process mode).
+    # We mount at "/" so the browser can resolve relative asset paths
+    # (css/style.css, js/app.js, assets/favicon.svg) without needing a
+    # /ui prefix. FastAPI resolves registered routes BEFORE falling
+    # through to the static mount, so /api/* and /ws keep working.
     frontend_dir = Path(settings.root_dir) / "frontend"
     if frontend_dir.exists():
-        app.mount("/ui", StaticFiles(directory=str(frontend_dir), html=True), name="ui")
-
-        @app.get("/")
-        async def root_index() -> FileResponse:
-            return FileResponse(str(frontend_dir / "index.html"))
+        app.mount(
+            "/",
+            StaticFiles(directory=str(frontend_dir), html=True),
+            name="frontend",
+        )
 
     return app
 
