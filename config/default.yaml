@@ -1,0 +1,92 @@
+# ══════════════════════════════════════════════════════════════════
+#  SAURON — default runtime configuration
+#  Overridden by environment variables (.env) and config/local.yaml
+# ══════════════════════════════════════════════════════════════════
+
+app:
+  name: SAURON
+  version: 0.1.0
+  environment: development
+
+api:
+  host: 0.0.0.0
+  port: 8000
+  cors_origins:
+    - "http://localhost:8080"
+    - "http://127.0.0.1:8080"
+
+web:
+  host: 0.0.0.0
+  port: 8080
+  static_dir: frontend
+
+mcp:
+  host: 0.0.0.0
+  port: 8765
+  transport: websocket   # websocket | stdio
+
+database:
+  url: sqlite:///./data/sauron.db
+  echo: false
+
+agent:
+  max_iterations: 50
+  planning_model: claude
+  execution_model: ollama
+  reflection_enabled: true
+  auto_approve_commands: false
+  system_prompt_file: config/prompts/system.md
+
+executor:
+  workdir: /tmp/sauron-work
+  timeout_seconds: 900
+  screenshots: true
+  record_pty: true
+  forbidden_patterns:
+    - "rm -rf /"
+    - ":(){ :|:& };:"
+    - "mkfs"
+    - "dd if=/dev/zero"
+
+stealth:
+  default_profile: normal
+  profiles:
+    silent:
+      scan_timing: T1
+      jitter_ms: [2000, 8000]
+      user_agent_rotation: true
+      randomise_source_port: true
+      max_parallel: 2
+    normal:
+      scan_timing: T3
+      jitter_ms: [200, 1500]
+      user_agent_rotation: true
+      randomise_source_port: false
+      max_parallel: 8
+    aggressive:
+      scan_timing: T4
+      jitter_ms: [0, 100]
+      user_agent_rotation: false
+      randomise_source_port: false
+      max_parallel: 32
+
+reporting:
+  company_name: "Your Security Team"
+  output_dir: ./reports/output
+  include_screenshots: true
+  include_raw_logs: true
+  cvss_version: "3.1"
+  frameworks:
+    - OWASP
+    - MITRE_ATTACK
+    - CWE
+    - NIST
+
+auth:
+  enabled: true
+  token_expiry_minutes: 480
+  rbac:
+    roles:
+      - admin        # everything
+      - operator     # run engagements, view reports
+      - viewer       # read-only reports

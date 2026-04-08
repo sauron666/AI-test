@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120">
+  <defs>
+    <radialGradient id="eye" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffdf6b"/>
+      <stop offset="35%" stop-color="#ff7a45"/>
+      <stop offset="75%" stop-color="#ff3b3b"/>
+      <stop offset="100%" stop-color="#1a0202"/>
+    </radialGradient>
+    <linearGradient id="text" x1="0" x2="1">
+      <stop offset="0%" stop-color="#ff3b3b"/>
+      <stop offset="100%" stop-color="#ffb366"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="60" cy="60" rx="48" ry="26" fill="url(#eye)"/>
+  <ellipse cx="60" cy="60" rx="10" ry="24" fill="#05070d"/>
+  <circle cx="60" cy="60" r="3" fill="#fff"/>
+  <text x="130" y="68" font-family="Orbitron, Arial, sans-serif" font-size="38" font-weight="900"
+        letter-spacing="6" fill="url(#text)">SAURON</text>
+  <text x="132" y="92" font-family="JetBrains Mono, monospace" font-size="10"
+        letter-spacing="3" fill="#7a8398">THE ALL-SEEING AI</text>
+</svg>

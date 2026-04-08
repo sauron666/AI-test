@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SAURON — The All-Seeing AI</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="scanlines">
+
+  <!-- ── Top navigation ───────────────────────────────── -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="eye" aria-hidden="true">👁</span>
+      <span class="brand-text">SAURON</span>
+      <span class="tagline">the all-seeing AI</span>
+    </div>
+    <nav class="tabs">
+      <button class="tab active" data-view="dashboard">Dashboard</button>
+      <button class="tab" data-view="engagements">Engagements</button>
+      <button class="tab" data-view="terminal">Live Terminal</button>
+      <button class="tab" data-view="tools">Tool Arsenal</button>
+      <button class="tab" data-view="findings">Findings</button>
+      <button class="tab" data-view="reports">Reports</button>
+      <button class="tab" data-view="settings">Settings</button>
+    </nav>
+    <div class="connection">
+      <span id="ws-dot" class="dot offline"></span>
+      <span id="ws-label">connecting…</span>
+    </div>
+  </header>
+
+  <!-- ── Views ───────────────────────────────────────── -->
+  <main id="app">
+
+    <!-- Dashboard -->
+    <section class="view active" id="view-dashboard">
+      <div class="grid metrics">
+        <div class="card metric">
+          <div class="label">Engagements</div>
+          <div class="value" id="m-engagements">—</div>
+        </div>
+        <div class="card metric">
+          <div class="label">Findings</div>
+          <div class="value" id="m-findings">—</div>
+        </div>
+        <div class="card metric">
+          <div class="label">Critical</div>
+          <div class="value crit" id="m-critical">—</div>
+        </div>
+        <div class="card metric">
+          <div class="label">Kali Tools</div>
+          <div class="value" id="m-tools">—</div>
+        </div>
+      </div>
+
+      <div class="grid two-col">
+        <div class="card">
+          <h3>Agent Activity</h3>
+          <div id="activity-feed" class="feed"></div>
+        </div>
+        <div class="card">
+          <h3>Engagement Phases</h3>
+          <div id="phase-graph" class="phase-graph">
+            <div class="phase" data-phase="recon">Recon</div>
+            <div class="phase" data-phase="scan">Scan</div>
+            <div class="phase" data-phase="exploit">Exploit</div>
+            <div class="phase" data-phase="post_exploit">Post-Ex</div>
+            <div class="phase" data-phase="report">Report</div>
+          </div>
+          <h3 style="margin-top:24px">System Prompt Preview</h3>
+          <pre id="system-prompt-preview" class="mono small">Loading...</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Engagements -->
+    <section class="view" id="view-engagements">
+      <div class="toolbar">
+        <button class="btn primary" id="new-engagement">+ New Engagement</button>
+        <input type="search" id="eng-filter" placeholder="Filter engagements…" />
+      </div>
+      <div id="engagement-list" class="card list"></div>
+    </section>
+
+    <!-- Live terminal -->
+    <section class="view" id="view-terminal">
+      <div class="card terminal">
+        <div class="term-head">
+          <span class="dotset"><i></i><i></i><i></i></span>
+          <span class="term-title">sauron@agent:~ — live stream</span>
+        </div>
+        <div class="term-body" id="terminal-body"></div>
+      </div>
+    </section>
+
+    <!-- Tool arsenal -->
+    <section class="view" id="view-tools">
+      <div class="toolbar">
+        <input type="search" id="tool-filter" placeholder="Search 500+ tools…" />
+        <select id="tool-domain-filter">
+          <option value="">All domains</option>
+        </select>
+      </div>
+      <div id="tool-grid" class="grid tools"></div>
+    </section>
+
+    <!-- Findings -->
+    <section class="view" id="view-findings">
+      <div id="findings-list" class="card list"></div>
+    </section>
+
+    <!-- Reports -->
+    <section class="view" id="view-reports">
+      <div id="reports-list" class="card list"></div>
+    </section>
+
+    <!-- Settings -->
+    <section class="view" id="view-settings">
+      <div class="card">
+        <h3>LLM Providers</h3>
+        <div id="llm-providers"></div>
+      </div>
+      <div class="card">
+        <h3>Stealth Profile</h3>
+        <select id="stealth-select">
+          <option value="silent">Silent (T1 · maximal jitter)</option>
+          <option value="normal" selected>Normal (T3)</option>
+          <option value="aggressive">Aggressive (T4 · no jitter)</option>
+        </select>
+        <p class="hint">SAURON applies jitter, UA rotation and EDR-safe timings according to the selected profile. No payloads or evasion malware are generated.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ── New Engagement Modal ─────────────────────────── -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-body card">
+      <h3>Launch a New Engagement</h3>
+      <label>Name<input id="f-name" placeholder="Acme web app — Q2"></label>
+      <label>Profile
+        <select id="f-profile"></select>
+      </label>
+      <label>Scope (JSON)<textarea id="f-scope" rows="4">{
+  "targets": ["https://target.example.com"]
+}</textarea></label>
+      <label>Rules of Engagement<textarea id="f-roe" rows="3" placeholder="Client name, time window, out-of-scope hosts…"></textarea></label>
+      <label>Stealth profile
+        <select id="f-stealth">
+          <option value="silent">Silent</option>
+          <option value="normal" selected>Normal</option>
+          <option value="aggressive">Aggressive</option>
+        </select>
+      </label>
+      <label>LLM Provider
+        <select id="f-llm"></select>
+      </label>
+      <div class="modal-actions">
+        <button class="btn ghost" id="modal-cancel">Cancel</button>
+        <button class="btn primary" id="modal-submit">Launch</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="cursor-blink"></div>
+  <script src="js/api.js"></script>
+  <script src="js/ws.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

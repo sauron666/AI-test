@@ -1,0 +1,93 @@
+# ══════════════════════════════════════════════════════════════════
+#  LLM provider catalog
+#  Each entry is surfaced in the SAURON dashboard's model picker.
+# ══════════════════════════════════════════════════════════════════
+
+providers:
+
+  claude:
+    display_name: "Anthropic Claude"
+    enabled: true
+    default_model: claude-opus-4-6
+    models:
+      - id: claude-opus-4-6
+        alias: "Claude Opus 4.6"
+        context_window: 200000
+        tier: flagship
+        good_for: [planning, exploitation, complex_reasoning]
+      - id: claude-sonnet-4-6
+        alias: "Claude Sonnet 4.6"
+        context_window: 200000
+        tier: balanced
+        good_for: [triage, recon, reporting]
+      - id: claude-haiku-4-5-20251001
+        alias: "Claude Haiku 4.5"
+        context_window: 200000
+        tier: fast
+        good_for: [summarisation, parsing]
+
+  openai:
+    display_name: "OpenAI GPT"
+    enabled: true
+    default_model: gpt-4o
+    models:
+      - id: gpt-4o
+        alias: "GPT-4o"
+        context_window: 128000
+        tier: flagship
+      - id: gpt-4o-mini
+        alias: "GPT-4o mini"
+        context_window: 128000
+        tier: fast
+      - id: o1
+        alias: "o1"
+        context_window: 128000
+        tier: reasoning
+
+  gemini:
+    display_name: "Google Gemini"
+    enabled: true
+    default_model: gemini-2.0-pro
+    models:
+      - id: gemini-2.0-pro
+        alias: "Gemini 2.0 Pro"
+        context_window: 2000000
+        tier: flagship
+      - id: gemini-1.5-flash
+        alias: "Gemini 1.5 Flash"
+        context_window: 1000000
+        tier: fast
+
+  ollama:
+    display_name: "Ollama (Local)"
+    enabled: true
+    default_model: whiterabbitneo:13b
+    models:
+      - id: whiterabbitneo:13b
+        alias: "WhiteRabbitNeo 13B (uncensored offensive-sec)"
+        context_window: 16384
+        tier: offensive
+        notes: "Fine-tuned for red-team reasoning; runs fully offline."
+      - id: whiterabbitneo:33b
+        alias: "WhiteRabbitNeo 33B"
+        context_window: 32768
+        tier: offensive_large
+      - id: llama3.1:70b
+        alias: "Llama 3.1 70B"
+        context_window: 128000
+        tier: generalist
+      - id: qwen2.5-coder:32b
+        alias: "Qwen 2.5 Coder 32B"
+        context_window: 128000
+        tier: coder
+
+# Router weights — used by backend/llm/router.py
+routing:
+  planning:
+    prefer: [claude, openai, gemini, ollama]
+  execution:
+    prefer: [ollama, claude, openai]
+  parsing:
+    prefer: [ollama, claude, gemini]
+  reporting:
+    prefer: [claude, gemini, openai]

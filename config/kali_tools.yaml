@@ -1,0 +1,273 @@
+# ══════════════════════════════════════════════════════════════════
+#  Kali tool catalog exposed to the AI agent.
+#  Each entry becomes an MCP tool with a structured description.
+# ══════════════════════════════════════════════════════════════════
+
+# ── Reconnaissance / OSINT ────────────────────────────────────────
+recon:
+  - name: amass
+    cmd: amass
+    category: osint
+    desc: "Subdomain enumeration using multiple data sources."
+  - name: subfinder
+    cmd: subfinder
+    category: osint
+    desc: "Fast passive subdomain discovery."
+  - name: assetfinder
+    cmd: assetfinder
+    category: osint
+    desc: "Finds domains and subdomains related to a given target."
+  - name: theharvester
+    cmd: theHarvester
+    category: osint
+    desc: "Gathers emails, subdomains, hosts, employee names from public sources."
+  - name: spiderfoot
+    cmd: spiderfoot
+    category: osint
+  - name: shodan
+    cmd: shodan
+    category: osint
+  - name: whois
+    cmd: whois
+    category: osint
+  - name: dnsrecon
+    cmd: dnsrecon
+    category: dns
+  - name: fierce
+    cmd: fierce
+    category: dns
+  - name: dnsenum
+    cmd: dnsenum
+    category: dns
+
+# ── Network / port scanning ───────────────────────────────────────
+network:
+  - name: nmap
+    cmd: nmap
+    category: port_scan
+    desc: "Industry-standard port and service scanner."
+  - name: masscan
+    cmd: masscan
+    category: port_scan
+  - name: rustscan
+    cmd: rustscan
+    category: port_scan
+  - name: naabu
+    cmd: naabu
+    category: port_scan
+  - name: netdiscover
+    cmd: netdiscover
+    category: network_discovery
+  - name: arp-scan
+    cmd: arp-scan
+    category: network_discovery
+  - name: tshark
+    cmd: tshark
+    category: sniffing
+  - name: bettercap
+    cmd: bettercap
+    category: mitm
+  - name: responder
+    cmd: responder
+    category: llmnr_poison
+
+# ── Web application ───────────────────────────────────────────────
+web:
+  - name: nikto
+    cmd: nikto
+    category: web_scanner
+  - name: nuclei
+    cmd: nuclei
+    category: template_scanner
+    desc: "Fast, template-based vulnerability scanner."
+  - name: wpscan
+    cmd: wpscan
+    category: cms
+  - name: joomscan
+    cmd: joomscan
+    category: cms
+  - name: ffuf
+    cmd: ffuf
+    category: fuzzing
+  - name: gobuster
+    cmd: gobuster
+    category: fuzzing
+  - name: feroxbuster
+    cmd: feroxbuster
+    category: fuzzing
+  - name: dirsearch
+    cmd: dirsearch
+    category: fuzzing
+  - name: sqlmap
+    cmd: sqlmap
+    category: sqli
+  - name: dalfox
+    cmd: dalfox
+    category: xss
+  - name: xsstrike
+    cmd: xsstrike
+    category: xss
+  - name: whatweb
+    cmd: whatweb
+    category: fingerprint
+  - name: wafw00f
+    cmd: wafw00f
+    category: waf_detect
+  - name: zap
+    cmd: zap-cli
+    category: web_scanner
+  - name: burp
+    cmd: burpsuite
+    category: web_scanner
+    notes: "Launched headless via burpsuite_pro extension API when available."
+
+# ── API testing ───────────────────────────────────────────────────
+api:
+  - name: kiterunner
+    cmd: kr
+    category: api_discovery
+  - name: arjun
+    cmd: arjun
+    category: parameter_discovery
+  - name: mitmproxy
+    cmd: mitmdump
+    category: proxy
+  - name: postman-cli
+    cmd: newman
+    category: api_tests
+
+# ── Mobile ────────────────────────────────────────────────────────
+mobile:
+  - name: mobsf
+    cmd: mobsfscan
+    category: static_analysis
+  - name: apktool
+    cmd: apktool
+    category: reverse
+  - name: jadx
+    cmd: jadx
+    category: reverse
+  - name: frida
+    cmd: frida
+    category: dynamic
+  - name: objection
+    cmd: objection
+    category: dynamic
+  - name: drozer
+    cmd: drozer
+    category: dynamic
+
+# ── Passwords & hashes ────────────────────────────────────────────
+passwords:
+  - name: hydra
+    cmd: hydra
+    category: online_brute
+  - name: medusa
+    cmd: medusa
+    category: online_brute
+  - name: john
+    cmd: john
+    category: offline_crack
+  - name: hashcat
+    cmd: hashcat
+    category: offline_crack
+  - name: cewl
+    cmd: cewl
+    category: wordlist_gen
+  - name: crunch
+    cmd: crunch
+    category: wordlist_gen
+
+# ── Active Directory ──────────────────────────────────────────────
+active_directory:
+  - name: bloodhound
+    cmd: bloodhound-python
+    category: ad_enum
+  - name: crackmapexec
+    cmd: crackmapexec
+    category: ad_enum
+  - name: netexec
+    cmd: netexec
+    category: ad_enum
+  - name: impacket-GetUserSPNs
+    cmd: GetUserSPNs.py
+    category: kerberoast
+  - name: impacket-GetNPUsers
+    cmd: GetNPUsers.py
+    category: asreproast
+  - name: impacket-secretsdump
+    cmd: secretsdump.py
+    category: credential_dump
+  - name: impacket-psexec
+    cmd: psexec.py
+    category: lateral
+  - name: impacket-wmiexec
+    cmd: wmiexec.py
+    category: lateral
+  - name: kerbrute
+    cmd: kerbrute
+    category: user_enum
+  - name: certipy
+    cmd: certipy
+    category: adcs
+  - name: ldapdomaindump
+    cmd: ldapdomaindump
+    category: ldap_enum
+
+# ── Vulnerability scanners ────────────────────────────────────────
+vuln:
+  - name: openvas
+    cmd: gvm-cli
+    category: vuln_scanner
+  - name: nessus
+    cmd: nessuscli
+    category: vuln_scanner
+    notes: "Requires licensed Nessus install."
+  - name: searchsploit
+    cmd: searchsploit
+    category: exploit_db
+
+# ── Exploitation frameworks ───────────────────────────────────────
+exploit:
+  - name: metasploit
+    cmd: msfconsole
+    category: framework
+    notes: "Driven non-interactively via -x resource scripts."
+  - name: routersploit
+    cmd: rsf.py
+    category: framework
+  - name: beef
+    cmd: beef-xss
+    category: browser
+
+# ── Wireless ──────────────────────────────────────────────────────
+wireless:
+  - name: aircrack-ng
+    cmd: aircrack-ng
+    category: wifi
+  - name: airodump-ng
+    cmd: airodump-ng
+    category: wifi
+  - name: reaver
+    cmd: reaver
+    category: wps
+  - name: wifite
+    cmd: wifite
+    category: wifi
+
+# ── LLM / AI security ─────────────────────────────────────────────
+llm_security:
+  - name: garak
+    cmd: garak
+    category: llm_vuln_scanner
+    desc: "NVIDIA garak — LLM vulnerability scanner."
+  - name: promptmap
+    cmd: promptmap
+    category: prompt_injection
+  - name: llm-guard
+    cmd: llm-guard
+    category: guardrails_test
+  - name: pyrit
+    cmd: pyrit
+    category: llm_red_team
+    desc: "Microsoft PyRIT red-team orchestration for GenAI."

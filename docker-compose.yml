@@ -1,0 +1,57 @@
+version: "3.9"
+
+# ══════════════════════════════════════════════════════════════════
+#  SAURON stack — sauron core + ollama brain + optional postgres
+# ══════════════════════════════════════════════════════════════════
+services:
+
+  sauron:
+    build: .
+    container_name: sauron-core
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      DATABASE_URL: sqlite:///./data/sauron.db
+    ports:
+      - "8000:8000"   # FastAPI
+      - "8080:8080"   # Web dashboard
+      - "8765:8765"   # MCP server
+    volumes:
+      - ./data:/opt/sauron/data
+      - ./logs:/opt/sauron/logs
+      - ./reports/output:/opt/sauron/reports/output
+      - ./screenshots:/opt/sauron/screenshots
+      - ./artifacts:/opt/sauron/artifacts
+    # Red-team engagements frequently need raw sockets / monitor-mode;
+    # uncomment the cap_add / network_mode block your engagement needs.
+    # cap_add: ["NET_ADMIN", "NET_RAW"]
+    # network_mode: host
+    depends_on:
+      - ollama
+    networks: [sauron-net]
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: sauron-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    # If you have a GPU, uncomment:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+    networks: [sauron-net]
+
+volumes:
+  ollama-data:
+
+networks:
+  sauron-net:
+    driver: bridge

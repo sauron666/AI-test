@@ -1,0 +1,58 @@
+# ── Python ────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ── SAURON runtime data ───────────────────────────────
+data/
+logs/
+reports/output/
+screenshots/
+artifacts/
+sessions/
+*.sqlite
+*.sqlite3
+*.db
+
+# ── Secrets & config ──────────────────────────────────
+.env
+.env.*
+!.env.example
+config/local.yaml
+config/secrets.yaml
+*.pem
+*.key
+*.crt
+
+# ── Editors / OS ──────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Node (frontend optional tooling) ──────────────────
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# ── Docker ────────────────────────────────────────────
+docker/volumes/
+
+# ── Ollama cache ──────────────────────────────────────
+.ollama/
