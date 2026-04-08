@@ -25,9 +25,11 @@ jinja2>=3.1
 python-multipart>=0.0.9
 
 # ── Auth ─────────────────────────────────────────────
-passlib[bcrypt]>=1.7.4
-# python-jose is unmaintained; pyjwt is the modern replacement.
-# We keep jose optional-ish via a soft import fallback in code.
+# passlib is unmaintained and breaks on bcrypt>=4
+# (AttributeError: module 'bcrypt' has no attribute '__about__').
+# We use bcrypt directly in backend/utils/security.py.
+bcrypt>=4.1
+# python-jose is also unmaintained; pyjwt is the modern replacement.
 pyjwt[crypto]>=2.8
 
 # ── Database ─────────────────────────────────────────
